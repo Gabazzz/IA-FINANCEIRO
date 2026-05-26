@@ -1,6 +1,8 @@
 /* ==========================================================================
-   Sobrevive HUD — Core Logic & Interface Bindings
+   Previo HUD — Core Logic & Interface Bindings
    ========================================================================== */
+
+import { supabase } from './supabase.js';
 
 // 1. PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
@@ -12,9 +14,9 @@ if ('serviceWorker' in navigator) {
 }
 
 // 2. Application State & Storage Keys
-const STORAGE_KEY = 'sobrevive_transactions';
-const FILTER_STORAGE_KEY = 'sobrevive_period_filter';
-const DELTA_STORAGE_KEY = 'sobrevive_last_days';
+const STORAGE_KEY = 'previo_transactions';
+const FILTER_STORAGE_KEY = 'previo_period_filter';
+const DELTA_STORAGE_KEY = 'previo_last_days';
 
 let transactions = [];
 let currentView = 'dashboard';
@@ -154,46 +156,63 @@ const CATEGORY_COLORS = {
 };
 
 // 4. Initialization
-function initApp() {
-  loadData();
+async function initApp() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    document.getElementById('screen-auth').style.display = 'flex';
+    document.querySelector('.phone-viewport').style.display = 'none';
+    return;
+  }
+  document.getElementById('screen-auth').style.display = 'none';
+  document.querySelector('.phone-viewport').style.display = 'flex';
+
+  await loadData();
   setupEventListeners();
   populateMonthSelector();
   initDateFilterState();
-  
+
   if (transactions.length === 0) {
-    // Show onboarding step 1
     DOM.screenOnboarding.style.display = 'flex';
     DOM.onboardingStep1.style.display = 'block';
     DOM.onboardingStep2.style.display = 'none';
     DOM.onboardingStep3.style.display = 'none';
     DOM.onboardingStep4.style.display = 'none';
   } else {
-    // Hide onboarding and calculate
     DOM.screenOnboarding.style.display = 'none';
     processAndRenderAll();
   }
 }
 
-// Load from LocalStorage
-function loadData() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (data) {
-    transactions = JSON.parse(data);
-    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-  } else {
-    transactions = [];
-  }
-  
-  // Load saved date filter settings
+// Load from Supabase
+async function loadData() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const savedFilter = localStorage.getItem(FILTER_STORAGE_KEY);
-  if (savedFilter) {
-    activePeriodFilter = JSON.parse(savedFilter);
+  if (savedFilter) activePeriodFilter = JSON.parse(savedFilter);
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('date', { ascending: false });
+
+  if (!error && data) {
+    transactions = data.map(t => ({
+      id: t.id,
+      date: t.date,
+      type: t.type,
+      category: t.category,
+      description: t.description,
+      value: t.value,
+      recurring: t.recurring
+    }));
   }
 }
 
-// Save to LocalStorage
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+// Save to Supabase (no-op — saves done per operation)
+async function saveData() {
+  // Não faz nada — salvar é feito individualmente por operação
 }
 
 function initDateFilterState() {
@@ -412,62 +431,25 @@ function handleApplyDateFilter() {
   processAndRenderAll();
 }
 
-function submitOnboardingData() {
+async function submitOnboardingData() {
+  const { data: { user } } = await supabase.auth.getUser();
   const initialBalance = parseFloat(DOM.inputInitialBalance.value);
   const monthlyIncome = parseFloat(DOM.inputMonthlyIncome.value);
   const mainFixed = parseFloat(DOM.inputMainFixed.value);
   const mainFixedDesc = DOM.inputMainFixedDesc.value.trim() || 'Despesa Fixa';
-  
   const todayStr = new Date().toISOString().split('T')[0];
-  
-  // 1. Initial Balance Entry
-  const initialTx = {
-    id: Date.now().toString(),
-    date: todayStr,
-    type: 'entrada',
-    category: 'Saldo Inicial',
-    description: 'Saldo Inicial',
-    value: initialBalance,
-    recurring: false
-  };
-  transactions.push(initialTx);
-  
-  // 2. Monthly Income (Salário) recurring
-  if (!isNaN(monthlyIncome) && monthlyIncome > 0) {
-    const incomeTx = {
-      id: (Date.now() + 1).toString(),
-      date: todayStr,
-      type: 'entrada',
-      category: 'Salário',
-      description: 'Renda Mensal Estimada',
-      value: monthlyIncome,
-      recurring: true
-    };
-    transactions.push(incomeTx);
-  }
-  
-  // 3. Main Fixed Expense (Moradia) recurring
-  if (!isNaN(mainFixed) && mainFixed > 0) {
-    const expenseTx = {
-      id: (Date.now() + 2).toString(),
-      date: todayStr,
-      type: 'saída',
-      category: 'Moradia',
-      description: mainFixedDesc,
-      value: mainFixed,
-      recurring: true
-    };
-    transactions.push(expenseTx);
-  }
-  
-  saveData();
-  populateMonthSelector(); // Refresh month options after adding transactions
-  
+
+  const toInsert = [];
+  toInsert.push({ user_id: user.id, date: todayStr, type: 'entrada', category: 'Saldo Inicial', description: 'Saldo Inicial', value: initialBalance, recurring: false });
+  if (!isNaN(monthlyIncome) && monthlyIncome > 0) toInsert.push({ user_id: user.id, date: todayStr, type: 'entrada', category: 'Salário', description: 'Renda Mensal Estimada', value: monthlyIncome, recurring: true });
+  if (!isNaN(mainFixed) && mainFixed > 0) toInsert.push({ user_id: user.id, date: todayStr, type: 'saída', category: 'Moradia', description: mainFixedDesc, value: mainFixed, recurring: true });
+
+  const { data, error } = await supabase.from('transactions').insert(toInsert).select();
+  if (!error && data) transactions = data.map(t => ({ id: t.id, date: t.date, type: t.type, category: t.category, description: t.description, value: t.value, recurring: t.recurring }));
+
+  populateMonthSelector();
   DOM.screenOnboarding.style.opacity = '0';
-  setTimeout(() => {
-    DOM.screenOnboarding.style.display = 'none';
-    processAndRenderAll();
-  }, 300);
+  setTimeout(() => { DOM.screenOnboarding.style.display = 'none'; processAndRenderAll(); }, 300);
 }
 
 // 5. Navigation View Swapper
@@ -586,58 +568,44 @@ function highlightSelectedCategoryChip() {
   });
 }
 
-function handleModalSubmit() {
+async function handleModalSubmit() {
   const val = parseFloat(DOM.modalInputValue.value);
   const type = DOM.toggleOptExpense.classList.contains('active') ? 'saída' : 'entrada';
   const desc = DOM.modalInputDesc.value.trim();
   const date = DOM.modalInputDate.value;
   const recurring = DOM.modalInputRecurring.checked;
-  
-  if (isNaN(val) || val <= 0) {
-    alert('Por favor, insira um valor válido maior que zero.');
-    return;
-  }
-  if (!date) {
-    alert('Por favor, insira uma data válida.');
-    return;
-  }
-  
+
+  if (isNaN(val) || val <= 0) { alert('Por favor, insira um valor válido maior que zero.'); return; }
+  if (!date) { alert('Por favor, insira uma data válida.'); return; }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
   if (activeEditId) {
-    const index = transactions.findIndex(t => t.id === activeEditId);
-    if (index !== -1) {
-      transactions[index] = {
-        ...transactions[index],
-        type,
-        value: val,
-        category: selectedCategory,
-        description: desc || selectedCategory,
-        date,
-        recurring
-      };
+    const { error } = await supabase.from('transactions').update({
+      type, value: val, category: selectedCategory,
+      description: desc || selectedCategory, date, recurring
+    }).eq('id', activeEditId);
+    if (!error) {
+      const index = transactions.findIndex(t => t.id === activeEditId);
+      if (index !== -1) transactions[index] = { ...transactions[index], type, value: val, category: selectedCategory, description: desc || selectedCategory, date, recurring };
     }
   } else {
-    const newTx = {
-      id: Date.now().toString(),
-      date,
-      type,
-      category: selectedCategory,
-      description: desc || selectedCategory,
-      value: val,
-      recurring
-    };
-    transactions.push(newTx);
+    const { data, error } = await supabase.from('transactions').insert({
+      user_id: user.id, type, value: val, category: selectedCategory,
+      description: desc || selectedCategory, date, recurring
+    }).select().single();
+    if (!error && data) transactions.push({ id: data.id, date: data.date, type: data.type, category: data.category, description: data.description, value: data.value, recurring: data.recurring });
   }
-  
-  saveData();
+
   processAndRenderAll();
   closeModal();
 }
 
-function handleModalDelete() {
+async function handleModalDelete() {
   if (activeEditId) {
     if (confirm('Tem certeza que deseja excluir este lançamento?')) {
+      await supabase.from('transactions').delete().eq('id', activeEditId);
       transactions = transactions.filter(t => t.id !== activeEditId);
-      saveData();
       processAndRenderAll();
       closeModal();
     }
@@ -1846,6 +1814,52 @@ async function handleAISubmit() {
     aiSheet.btnSubmit.disabled = false;
   }
 }
+
+// Auth functions
+let currentAuthMode = 'login';
+
+window.showTab = function(tab) {
+  currentAuthMode = tab;
+  document.getElementById('tab-login').style.background = tab === 'login' ? '#10d98c' : 'transparent';
+  document.getElementById('tab-login').style.color = tab === 'login' ? '#020617' : '#64748b';
+  document.getElementById('tab-signup').style.background = tab === 'signup' ? '#10d98c' : 'transparent';
+  document.getElementById('tab-signup').style.color = tab === 'signup' ? '#020617' : '#64748b';
+  document.getElementById('btn-auth-submit').innerText = tab === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+};
+
+window.handleAuth = async function() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errorEl = document.getElementById('auth-error');
+  const btn = document.getElementById('btn-auth-submit');
+
+  if (!email || !password) { errorEl.innerText = 'Preencha email e senha.'; errorEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.innerText = 'Aguarde...';
+  errorEl.style.display = 'none';
+
+  let result;
+  if (currentAuthMode === 'login') {
+    result = await supabase.auth.signInWithPassword({ email, password });
+  } else {
+    result = await supabase.auth.signUp({ email, password });
+  }
+
+  if (result.error) {
+    errorEl.innerText = result.error.message;
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.innerText = currentAuthMode === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+  } else {
+    initApp();
+  }
+};
+
+window.logout = async function() {
+  await supabase.auth.signOut();
+  location.reload();
+};
 
 // Start App when loaded
 window.addEventListener('DOMContentLoaded', initApp);

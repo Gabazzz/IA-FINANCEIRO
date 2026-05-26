@@ -1,7 +1,7 @@
 {
-  "name": "Sobrevive — Radar de Autonomia Financeira",
-  "short_name": "Sobrevive",
-  "description": "Radar de sobrevivência financeira e cálculo em tempo real de autonomia monetária.",
+  "name": "Previo — Veja o Futuro do Seu Saldo",
+  "short_name": "Previo",
+  "description": "Veja o futuro do seu saldo antes dele acontecer. Radar de autonomia financeira com sincronização na nuvem.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#070c18",

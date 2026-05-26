@@ -1,9 +1,10 @@
-const CACHE_NAME = 'sobrevive-cache-v2';
+const CACHE_NAME = 'previo-cache-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.css',
   './app.js',
+  './supabase.js',
   './manifest.json',
   './icon.svg',
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
