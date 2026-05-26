@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "ANTHROPIC_KEY": "@anthropic-key"
+    }
+  }
+}
