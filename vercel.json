@@ -1,7 +1,5 @@
 {
-  "build": {
-    "env": {
-      "ANTHROPIC_KEY": "@anthropic-key"
-    }
-  }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
 }
