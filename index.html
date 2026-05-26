@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <!-- PWA & Mobile Viewport Settings -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070c18">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  
+  <title>Sobrevive — Radar de Autonomia</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Styling -->
+  <link rel="stylesheet" href="app.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Main Viewport Container -->
+  <div class="phone-viewport">
+    
+    <!-- Onboarding Screen (Overlay) -->
+    <div id="screen-onboarding" class="view-onboarding">
+      <!-- SVG Radar Icon -->
+      <svg class="onboarding-logo" viewBox="0 0 512 512">
+        <circle cx="256" cy="256" r="190" fill="none" stroke="#10d98c" stroke-width="3" stroke-dasharray="10 8" opacity="0.3"/>
+        <circle cx="256" cy="256" r="130" fill="none" stroke="#10d98c" stroke-width="2" stroke-dasharray="5 5" opacity="0.4"/>
+        <circle cx="256" cy="256" r="70" fill="none" stroke="#10d98c" stroke-width="1.5" opacity="0.6"/>
+        <line x1="256" y1="40" x2="256" y2="472" stroke="#10d98c" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.3"/>
+        <line x1="40" y1="256" x2="472" y2="256" stroke="#10d98c" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.3"/>
+        <path d="M 256 256 L 390 122 A 190 190 0 0 0 256 66 Z" fill="#10d98c" fill-opacity="0.15"/>
+        <line x1="256" y1="256" x2="390" y2="122" stroke="#10d98c" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="256" cy="256" r="12" fill="#070c18" stroke="#10d98c" stroke-width="3"/>
+      </svg>
+      
+      <h1 class="onboarding-title">SOBREVIVE</h1>
+      <p class="onboarding-subtitle">Painel de Sobrevivência Financeira</p>
+      
+      <!-- Step 1: Boas-vindas -->
+      <div id="onboarding-step-1" style="width: 100%;">
+        <p class="onboarding-text">Este não é um gerenciador de gastos comum. É um radar tático. Ele traduz seu dinheiro em tempo de autonomia.</p>
+        <button id="btn-start-onboarding" class="hud-btn primary" style="width: 100%;">COMEÇAR RADAR</button>
+      </div>
+      
+      <!-- Step 2: Saldo atual -->
+      <div id="onboarding-step-2" style="width: 100%; display: none;">
+        <div class="hud-input-group" style="margin-bottom: 24px;">
+          <label class="hud-input-label">Qual seu saldo disponível agora?</label>
+          <input type="number" id="input-initial-balance" class="hud-input large-numeric" placeholder="0,00" inputmode="decimal">
+        </div>
+        <button id="btn-onboarding-next-2" class="hud-btn primary" style="width: 100%;">PRÓXIMO →</button>
+      </div>
+
+      <!-- Step 3: Renda mensal estimada -->
+      <div id="onboarding-step-3" style="width: 100%; display: none;">
+        <div class="hud-input-group" style="margin-bottom: 20px;">
+          <label class="hud-input-label">Qual sua renda mensal estimada?</label>
+          <p class="hud-input-hint">Usamos para calibrar o radar. Pode ajustar depois.</p>
+          <input type="number" id="input-monthly-income" class="hud-input large-numeric" placeholder="0,00" inputmode="decimal">
+        </div>
+        <button id="btn-onboarding-next-3" class="hud-btn primary" style="width: 100%;">PRÓXIMO →</button>
+        <button class="hud-btn" style="width: 100%; margin-top: 8px;" id="btn-onboarding-skip-3">Pular por agora</button>
+      </div>
+
+      <!-- Step 4: Principal gasto fixo -->
+      <div id="onboarding-step-4" style="width: 100%; display: none;">
+        <div class="hud-input-group" style="margin-bottom: 20px;">
+          <label class="hud-input-label">Seu maior gasto fixo mensal?</label>
+          <p class="hud-input-hint">Ex: aluguel, financiamento. Isso calibra o saldo livre.</p>
+          <input type="number" id="input-main-fixed" class="hud-input large-numeric" placeholder="0,00" inputmode="decimal">
+          <input type="text" id="input-main-fixed-desc" class="hud-input" placeholder="Descrição (ex: Aluguel)" style="margin-top: 8px;">
+        </div>
+        <button id="btn-submit-onboarding" class="hud-btn primary" style="width: 100%;">ATIVAR SISTEMA</button>
+        <button class="hud-btn" style="width: 100%; margin-top: 8px;" id="btn-onboarding-skip-4">Pular e começar</button>
+      </div>
+    </div>
+
+    <!-- App Shell Header -->
+    <header class="app-header">
+      <div class="brand">
+        <!-- Minimal Radar SVG Logo -->
+        <svg class="brand-logo" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#10d98c" stroke-width="3" stroke-dasharray="3 3"/>
+          <line x1="50" y1="50" x2="78" y2="22" stroke="#10d98c" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="6" fill="#070c18" stroke="#10d98c" stroke-width="2"/>
+        </svg>
+        <span class="brand-name">SOBREVIVE</span>
+      </div>
+      
+      <!-- Date Filter & System Status grouped -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button id="btn-date-filter" class="date-filter-badge">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2.5" fill="none"></rect><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2.5"></line><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2.5"></line><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2.5"></line></svg>
+          <span id="date-filter-label">Este mês</span>
+        </button>
+        
+        <div class="system-status">
+          <span id="system-status-dot" class="pulse-dot"></span>
+          <span id="system-status-text">Radar Ativo</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable content area for views -->
+    <main class="views-container">
+      
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view active">
+        
+        <!-- Survival Status Card -->
+        <div id="survival-status-card" class="hud-card survival-status-card safe">
+          <div class="survival-title">
+            <span>Autonomia Financeira</span>
+            <span class="survival-zone-status">
+              <span class="pulse-dot" style="margin: 0;"></span>
+              <span id="hud-zone-text">ZONA SEGURA</span>
+            </span>
+          </div>
+          <div class="survival-days-display">
+            <span id="hud-days-number" class="survival-days-number">--</span>
+            <span class="survival-days-label">dias</span>
+            <!-- Delta temporal -->
+            <span id="hud-days-delta" class="survival-days-delta" style="display:none;"></span>
+          </div>
+          <div class="survival-subtitle" id="hud-survival-desc">
+            Seu saldo consegue cobrir suas despesas diárias atuais.
+          </div>
+          <div class="autonomy-bar-wrapper">
+            <div class="autonomy-bar">
+              <div id="hud-autonomy-bar-fill" class="autonomy-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <!-- CTA contextual — gerado via JS -->
+          <div id="hud-contextual-cta" class="contextual-cta" style="display:none;"></div>
+        </div>
+
+        <!-- Burn Acceleration Alert Banner -->
+        <div id="burn-acceleration-alert" class="inline-alert warning" style="display: none;">
+          ⚡ Seu ritmo de gasto acelerou esta semana. Atenção.
+        </div>
+
+        <!-- Key Metrics Grid -->
+        <div class="metrics-grid">
+          <!-- Metric 1: Saldo Livre vs Total (Double card layout) -->
+          <div class="metric-card metric-card-double metric-card-highlight">
+            <div class="metric-label">💰 Saldo</div>
+            <div id="metric-balance" class="metric-value">R$ 0,00</div>
+            <div class="metric-sublabel">
+              Livre: <span id="metric-free-balance" class="metric-sub-value safe">R$ 0,00</span>
+            </div>
+          </div>
+          <!-- Metric 2: Taxa de Queima -->
+          <div class="metric-card">
+            <div class="metric-label">🔥 Taxa de Queima</div>
+            <div id="metric-burnrate" class="metric-value">R$ 0/dia</div>
+            <div id="metric-burn-trend" class="burn-trend-indicator"></div>
+          </div>
+          <!-- Metric 3: Saldo dura até -->
+          <div class="metric-card">
+            <div class="metric-label">📅 Saldo dura até</div>
+            <div id="metric-enddate" class="metric-value">--/--</div>
+            <div class="metric-sublabel" style="border:none; padding:0; margin-top:2px; font-size:0.6rem; color:var(--text-muted)">
+              fixos excluídos
+            </div>
+          </div>
+          <!-- Metric 4: Distância do Colapso -->
+          <div class="metric-card">
+            <div class="metric-label">⚠️ Dist. Colapso</div>
+            <div id="metric-collapse-days" class="metric-value">--</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Daily Ceiling Card -->
+        <div class="hud-card daily-ceiling-card" id="daily-ceiling-card">
+          <div class="daily-ceiling-header">
+            <span class="daily-ceiling-label">QUANTO POSSO GASTAR HOJE?</span>
+            <span class="daily-ceiling-badge" id="daily-ceiling-badge">seguro</span>
+          </div>
+          <div class="daily-ceiling-values">
+            <div class="ceiling-option ceiling-safe">
+              <div class="ceiling-option-label">Com reserva</div>
+              <div class="ceiling-option-value" id="ceiling-safe-value">R$ 0</div>
+            </div>
+            <div class="ceiling-divider">|</div>
+            <div class="ceiling-option ceiling-breakeven">
+              <div class="ceiling-option-label">No limite</div>
+              <div class="ceiling-option-value warning" id="ceiling-breakeven-value">R$ 0</div>
+            </div>
+          </div>
+          <div class="ceiling-subtext" id="ceiling-subtext">Faltam -- dias no mês</div>
+        </div>
+
+        <!-- Projection Chart Card -->
+        <div class="hud-card chart-card">
+          <div class="section-header">
+            <h2 class="section-title">Projeção do Saldo (30 dias)</h2>
+          </div>
+          <div class="chart-container">
+            <canvas id="balanceChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Shortcuts Bar -->
+        <div class="shortcut-bar">
+          <button class="hud-btn" id="btn-quick-expense">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent-critical)" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Gasto</span>
+          </button>
+          <button class="hud-btn" id="btn-quick-income">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent-safe)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Receita</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- 2. TRANSACTIONS SCREEN -->
+      <section id="view-launches" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Lançamentos</h2>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+          <div class="filter-chips">
+            <div class="filter-chip active" data-filter="all">Tudo</div>
+            <div class="filter-chip" data-filter="entrada">Entradas</div>
+            <div class="filter-chip" data-filter="saída">Saídas</div>
+          </div>
+          <select id="month-selector" class="month-selector">
+            <!-- Dynamically populated options -->
+          </select>
+        </div>
+
+        <!-- Grouped List -->
+        <div id="launches-grouped-container">
+          <!-- Dynamically populated dates and items -->
+        </div>
+
+      </section>
+
+      <!-- 3. ANALYSIS / INSIGHTS SCREEN -->
+      <section id="view-analysis" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Análise de Sobrevivência</h2>
+        </div>
+
+        <!-- Summary Statistics Card -->
+        <div class="hud-card">
+          <div class="section-title" style="margin-bottom: 12px; font-size: 0.7rem;">Mapeamento Semanal</div>
+          <div class="trend-indicator" style="margin-bottom: 12px;">
+            <span>Queima acumulada 7 dias:</span>
+            <strong id="analysis-total-spent">R$ 0,00</strong>
+          </div>
+          <div class="trend-indicator">
+            <span>Relação vs. Mês Anterior:</span>
+            <span id="analysis-month-comparison" class="metric-change neutral">Calculando...</span>
+          </div>
+        </div>
+
+        <!-- Spending Category Chart (Tabs for Fixed vs Variable categories) -->
+        <div class="hud-card">
+          <div class="analysis-section-toggle">
+            <button class="analysis-tab active" data-tab="variable">Gastos Variáveis</button>
+            <button class="analysis-tab" data-tab="fixed">Fixos Recorrentes</button>
+          </div>
+          
+          <div id="analysis-tab-variable" class="analysis-tab-content active">
+            <div class="insights-row" id="analysis-category-bars-variable">
+              <!-- Dynamically loaded custom variable progress bars -->
+            </div>
+          </div>
+          
+          <div id="analysis-tab-fixed" class="analysis-tab-content" style="display: none;">
+            <div class="insights-row" id="analysis-category-bars-fixed">
+              <!-- Dynamically loaded custom fixed progress bars -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Most Expensive Habit Insights -->
+        <div class="hud-card" id="analysis-habit-card">
+          <div class="section-title" style="margin-bottom: 8px; font-size: 0.7rem;">Hábito Crítico</div>
+          <div class="trend-indicator">
+            <span id="analysis-habit-text">Registrando transações para identificar dreno principal...</span>
+          </div>
+        </div>
+
+        <!-- Smart Recommendation Card -->
+        <div class="hud-card smart-insight-card">
+          <div class="smart-insight-header">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Alerta do Radar</span>
+          </div>
+          <div class="smart-insight-text" id="analysis-smart-recommendation">
+            Adicione despesas e receitas recorrentes para que o radar consiga sugerir ajustes táticos ao seu padrão de vida.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 4. SIMULATOR SCREEN -->
+      <section id="view-simulator" class="view">
+        <div class="section-header">
+          <h2 class="section-title">Simulador de Crise</h2>
+        </div>
+
+        <!-- Big Visual Result HUD Card -->
+        <div id="sim-status-card" class="hud-card survival-status-card safe">
+          <div class="survival-title">
+            <span>Autonomia Simulada</span>
+            <span id="sim-zone-text" class="survival-zone-status">ZONA SEGURA</span>
+          </div>
+          <div class="survival-days-display">
+            <span id="sim-days-number" class="survival-days-number">--</span>
+            <span class="survival-days-label">dias</span>
+          </div>
+          <div class="autonomy-bar-wrapper">
+            <div class="autonomy-bar">
+              <div id="sim-autonomy-bar-fill" class="autonomy-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sliders Controls Group -->
+        <div class="hud-card" style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Slider 1: Daily Burn Rate -->
+          <div class="slider-container">
+            <div class="slider-header">
+              <span class="slider-label">💰 E se o gasto diário for:</span>
+              <span id="sim-val-burnrate" class="slider-val">R$ 0/dia</span>
+            </div>
+            <input type="range" id="sim-slider-burnrate" class="hud-slider" min="0" max="500" value="0">
+          </div>
+
+          <!-- Slider 2: Add Income -->
+          <div class="slider-container">
+            <div class="slider-header">
+              <span class="slider-label">⚡ E se eu adicionar renda:</span>
+              <span id="sim-val-income" class="slider-val">R$ 0</span>
+            </div>
+            <input type="range" id="sim-slider-income" class="hud-slider income" min="0" max="10000" step="100" value="0">
+          </div>
+        </div>
+
+        <!-- Simulation Comparison Feedback -->
+        <div id="sim-feedback-box" class="simulation-feedback">
+          Sua autonomia passaria de <span>-- para -- dias</span>.
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="nav-item-label">Radar</span>
+      </button>
+      
+      <button class="nav-item" data-view="launches">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span class="nav-item-label">Histórico</span>
+      </button>
+      
+      <!-- Glowing Center FAB -->
+      <div class="nav-item fab-item">
+        <button id="btn-fab-add" class="fab-btn">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      
+      <button class="nav-item" data-view="analysis">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="nav-item-label">Análise</span>
+      </button>
+      
+      <button class="nav-item" data-view="simulator">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        <span class="nav-item-label">Simular</span>
+      </button>
+    </nav>
+
+    <!-- Modal AI Entry Bottom Sheet -->
+    <div id="modal-ai-entry" class="modal-overlay">
+      <div class="bottom-sheet">
+
+        <div class="sheet-header">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span class="sheet-title">Registrar com IA</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">descreva em linguagem natural</span>
+          </div>
+          <button id="btn-ai-sheet-close" class="close-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ai-input-wrapper">
+          <textarea
+            id="ai-natural-input"
+            class="ai-natural-textarea"
+            placeholder="Ex: gastei 42 no ifood, recebi 1200 do freela, uber 15..."
+            rows="2"
+            maxlength="200"
+          ></textarea>
+          <button id="btn-ai-submit" class="ai-submit-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+
+        <div id="ai-loading-state" class="ai-loading" style="display: none;">
+          <div class="ai-loading-dot"></div>
+          <div class="ai-loading-dot"></div>
+          <div class="ai-loading-dot"></div>
+          <span class="ai-loading-text">Interpretando...</span>
+        </div>
+
+        <div id="ai-error-state" class="ai-error-msg" style="display: none;">
+          ⚠️ Não consegui interpretar. Tente ser mais específico ou use o formulário manual.
+        </div>
+
+        <div class="ai-sheet-divider">
+          <span>ou registre manualmente</span>
+        </div>
+
+        <div class="ai-manual-btns">
+          <button id="btn-ai-manual-expense" class="hud-btn" style="flex: 1; border-color: rgba(239, 68, 68, 0.3); color: var(--accent-critical);">
+            − Gasto
+          </button>
+          <button id="btn-ai-manual-income" class="hud-btn" style="flex: 1; border-color: rgba(16, 217, 140, 0.3); color: var(--accent-safe);">
+            + Receita
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal Date Filter Bottom Sheet -->
+    <div id="modal-date-filter" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="sheet-header">
+          <span class="sheet-title">Período de Análise</span>
+          <button id="btn-date-filter-close" class="close-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <!-- Pills de período rápido -->
+        <div class="period-pills">
+          <button class="period-pill" data-period="today">Hoje</button>
+          <button class="period-pill" data-period="7d">7 dias</button>
+          <button class="period-pill active" data-period="month">Este mês</button>
+          <button class="period-pill" data-period="last_month">Mês anterior</button>
+          <button class="period-pill" data-period="custom">Personalizado</button>
+        </div>
+        <!-- Campos de data customizada (visível só quando "Personalizado" ativo) -->
+        <div id="custom-date-fields" style="display:none;">
+          <div class="custom-date-row">
+            <input type="date" id="filter-date-from" class="hud-input">
+            <span>→</span>
+            <input type="date" id="filter-date-to" class="hud-input">
+          </div>
+        </div>
+        <button id="btn-apply-date-filter" class="hud-btn primary" style="width:100%;">Aplicar Filtro</button>
+        <!-- Reset destrutivo — posição segura, longe do fluxo principal -->
+        <button id="btn-reset-data" class="hud-btn" style="width:100%; border-color: rgba(239,68,68,0.2); color: var(--text-muted); font-size: 0.75rem; margin-top: -8px;">
+          Apagar todos os dados e reiniciar
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Transaction Bottom Sheet -->
+    <div id="modal-transaction" class="modal-overlay">
+      <div class="bottom-sheet">
+        
+        <!-- Header -->
+        <div class="sheet-header">
+          <span id="modal-title" class="sheet-title">Registrar Lançamento</span>
+          <button id="btn-modal-close" class="close-btn">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- Input Toggle: Saída vs Entrada -->
+        <div class="pill-toggle">
+          <div id="toggle-opt-expense" class="pill-option active saida" data-type="saída">SAÍDA</div>
+          <div id="toggle-opt-income" class="pill-option entrada" data-type="entrada">ENTRADA</div>
+        </div>
+
+        <!-- Center aligned large Value display -->
+        <div class="hud-input-group" style="align-items: center;">
+          <span class="hud-input-label">Valor do Registro</span>
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
+            <span style="font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--text-muted); margin-right: 6px;">R$</span>
+            <input type="number" id="modal-input-value" class="hud-input large-numeric" placeholder="0,00" step="0.01" inputmode="decimal">
+          </div>
+        </div>
+
+        <!-- Category Chips -->
+        <div class="hud-input-group">
+          <span class="hud-input-label">Categoria</span>
+          <div class="chips-container" id="category-chips-list">
+            <!-- Populated via script based on type toggled -->
+          </div>
+        </div>
+
+        <!-- Optional Description -->
+        <div class="hud-input-group">
+          <span class="hud-input-label">Descrição</span>
+          <input type="text" id="modal-input-desc" class="hud-input" placeholder="ex: iFood, Uber, Supermercado...">
+        </div>
+
+        <!-- Date Entry -->
+        <div class="hud-input-group">
+          <span class="hud-input-label">Data</span>
+          <input type="date" id="modal-input-date" class="hud-input">
+        </div>
+
+        <!-- Toggle Recorrente -->
+        <div class="toggle-switch-wrapper">
+          <div class="toggle-switch-label">
+            <span class="toggle-switch-title">Lançamento Recorrente?</span>
+            <span class="toggle-switch-desc">Repetir automaticamente todos os meses</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="modal-input-recurring">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Button Submit -->
+        <button id="btn-modal-submit" class="hud-btn primary" style="width: 100%; margin-top: 10px;">REGISTRAR</button>
+        <button id="btn-modal-delete" class="hud-btn critical" style="width: 100%; display: none;">EXCLUIR REGISTRO</button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Main Application Logic script -->
+  <script src="app.js"></script>
+</body>
+</html>

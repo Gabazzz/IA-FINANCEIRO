@@ -1,0 +1,19 @@
+{
+  "name": "Sobrevive — Radar de Autonomia Financeira",
+  "short_name": "Sobrevive",
+  "description": "Radar de sobrevivência financeira e cálculo em tempo real de autonomia monetária.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070c18",
+  "theme_color": "#070c18",
+  "orientation": "portrait",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
