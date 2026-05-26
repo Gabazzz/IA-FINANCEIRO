@@ -24,6 +24,10 @@ module.exports = async function handler(req, res) {
     return res.status(response.status).json(data);
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ 
+      error: err.message,
+      stack: err.stack,
+      hasKey: !!process.env.ANTHROPIC_KEY
+    });
   }
 };
