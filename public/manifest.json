@@ -4,8 +4,8 @@
   "description": "Veja o futuro do seu saldo antes dele acontecer. Radar de autonomia financeira com sincronização na nuvem.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#070c18",
-  "theme_color": "#070c18",
+  "background_color": "#020617",
+  "theme_color": "#00E09C",
   "orientation": "portrait",
   "categories": ["finance", "utilities"],
   "icons": [

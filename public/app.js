@@ -1099,7 +1099,7 @@ function renderDashboardChart() {
       ctx.stroke();
       
       ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 9px "IBM Plex Mono"';
+      ctx.font = 'bold 9px "Space Grotesk"';
       ctx.fillText('FIM DO MÊS', xPos + 4, top + 15);
       ctx.restore();
     }
@@ -1130,7 +1130,7 @@ function renderDashboardChart() {
 
         // Label 'COLAPSO' in monospaced font
         ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
-        ctx.font = '8px "IBM Plex Mono"';
+        ctx.font = '8px "Space Grotesk"';
         ctx.fillText('COLAPSO', left + 4, zeroY - 4);
         ctx.restore();
       }
@@ -1180,8 +1180,8 @@ function renderDashboardChart() {
         tooltip: {
           mode: 'index',
           intersect: false,
-          titleFont: { family: 'IBM Plex Mono', size: 10 },
-          bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+          titleFont: { family: 'Space Grotesk', size: 10 },
+          bodyFont: { family: 'Inter', size: 12 },
           backgroundColor: '#0f1729',
           titleColor: '#64748b',
           bodyColor: '#f1f5f9',
@@ -1204,7 +1204,7 @@ function renderDashboardChart() {
           grid: { display: false },
           ticks: {
             color: '#64748b',
-            font: { family: 'IBM Plex Mono', size: 8 },
+            font: { family: 'Space Grotesk', size: 8 },
             maxTicksLimit: 6
           }
         },
@@ -1215,7 +1215,7 @@ function renderDashboardChart() {
           },
           ticks: {
             color: '#64748b',
-            font: { family: 'IBM Plex Mono', size: 8 },
+            font: { family: 'Space Grotesk', size: 8 },
             maxTicksLimit: 4,
             callback: function(value) {
               return 'R$ ' + value;

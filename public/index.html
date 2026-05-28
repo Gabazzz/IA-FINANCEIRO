@@ -15,7 +15,7 @@
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Styling -->
   <link rel="stylesheet" href="app.css">
@@ -33,22 +33,41 @@
     
     <!-- Logo Previo -->
     <div style="margin-bottom:2rem; text-align:center;">
-      <img src="./logo.png" alt="Previo" style="width:180px; margin-bottom:0.5rem;" />
-      <p style="color:#64748b; font-size:0.75rem; letter-spacing:0.1em; font-family:'IBM Plex Mono', monospace;">VEJA O FUTURO DO SEU SALDO ANTES DELE ACONTECER</p>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="220" height="60" style="margin-bottom:0.5rem; display:inline-block;">
+        <defs>
+          <linearGradient id="previo-logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0D9B6C" />
+            <stop offset="100%" stop-color="#00E09C" />
+          </linearGradient>
+        </defs>
+        <!-- PREVI Text -->
+        <text x="10" y="58" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="52" fill="#F1F5F9" letter-spacing="6">PREVI</text>
+        <!-- Icon Ø as the O -->
+        <g transform="translate(205, 8) scale(0.64)">
+          <!-- Top-Left Arc -->
+          <path d="M 70.6 20.5 A 36 36 0 0 0 20.5 70.6" fill="none" stroke="url(#previo-logo-grad)" stroke-width="9" stroke-linecap="round" />
+          <!-- Bottom-Right Arc -->
+          <path d="M 29.4 79.5 A 36 36 0 0 0 79.5 29.4" fill="none" stroke="url(#previo-logo-grad)" stroke-width="9" stroke-linecap="round" />
+          <!-- Diagonal Arrow -->
+          <line x1="25" y1="75" x2="82" y2="18" stroke="url(#previo-logo-grad)" stroke-width="9" stroke-linecap="round" />
+          <path d="M 58 18 L 82 18 L 82 42" fill="none" stroke="url(#previo-logo-grad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+      </svg>
+      <p style="color:#64748b; font-size:0.75rem; letter-spacing:0.1em; font-family:'Space Grotesk', sans-serif;">VEJA O FUTURO DO SEU SALDO <span style="color:#00E09C">ANTES</span> DELE ACONTECER.</p>
     </div>
 
     <!-- Tabs Login/Cadastro -->
     <div style="display:flex; gap:0; margin-bottom:1.5rem; background:#0f1729; border-radius:10px; padding:4px;">
-      <button id="tab-login" onclick="showTab('login')" style="padding:0.5rem 1.5rem; border:none; border-radius:8px; background:#10d98c; color:#020617; font-weight:700; font-family:'IBM Plex Mono',monospace; cursor:pointer; font-size:0.8rem;">Login</button>
-      <button id="tab-signup" onclick="showTab('signup')" style="padding:0.5rem 1.5rem; border:none; border-radius:8px; background:transparent; color:#64748b; font-weight:700; font-family:'IBM Plex Mono',monospace; cursor:pointer; font-size:0.8rem;">Cadastro</button>
+      <button id="tab-login" onclick="showTab('login')" style="padding:0.5rem 1.5rem; border:none; border-radius:8px; background:#10d98c; color:#020617; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer; font-size:0.8rem;">Login</button>
+      <button id="tab-signup" onclick="showTab('signup')" style="padding:0.5rem 1.5rem; border:none; border-radius:8px; background:transparent; color:#64748b; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer; font-size:0.8rem;">Cadastro</button>
     </div>
 
     <!-- Formulário -->
     <div style="width:100%; max-width:360px; display:flex; flex-direction:column; gap:0.75rem;">
-      <input id="auth-email" type="email" placeholder="seu@email.com" style="padding:0.875rem 1rem; background:#0f1729; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#f1f5f9; font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; outline:none;" />
-      <input id="auth-password" type="password" placeholder="Senha" style="padding:0.875rem 1rem; background:#0f1729; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#f1f5f9; font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem; outline:none;" />
-      <button id="btn-auth-submit" onclick="handleAuth()" style="padding:0.875rem; background:#10d98c; border:none; border-radius:10px; color:#020617; font-weight:700; font-family:'IBM Plex Mono',monospace; font-size:0.9rem; cursor:pointer; margin-top:0.25rem;">ENTRAR</button>
-      <p id="auth-error" style="color:#ef4444; font-size:0.8rem; text-align:center; display:none; font-family:'Plus Jakarta Sans',sans-serif;"></p>
+      <input id="auth-email" type="email" placeholder="seu@email.com" style="padding:0.875rem 1rem; background:#0f1729; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#f1f5f9; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none;" />
+      <input id="auth-password" type="password" placeholder="Senha" style="padding:0.875rem 1rem; background:#0f1729; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#f1f5f9; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none;" />
+      <button id="btn-auth-submit" onclick="handleAuth()" style="padding:0.875rem; background:#10d98c; border:none; border-radius:10px; color:#020617; font-weight:700; font-family:'Space Grotesk',sans-serif; font-size:0.9rem; cursor:pointer; margin-top:0.25rem;">ENTRAR</button>
+      <p id="auth-error" style="color:#ef4444; font-size:0.8rem; text-align:center; display:none; font-family:'Inter',sans-serif;"></p>
     </div>
   </div>
 
@@ -135,7 +154,7 @@
           <span id="system-status-text">Radar Ativo</span>
         </div>
 
-        <button onclick="logout()" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#64748b; padding:0.25rem 0.75rem; border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; cursor:pointer;">SAIR</button>
+        <button onclick="logout()" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#64748b; padding:0.25rem 0.75rem; border-radius:6px; font-family:'Space Grotesk',sans-serif; font-size:0.7rem; cursor:pointer;">SAIR</button>
       </div>
     </header>
 

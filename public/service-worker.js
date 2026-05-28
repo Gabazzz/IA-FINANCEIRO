@@ -1,4 +1,4 @@
-const CACHE_NAME = 'previo-cache-v3';
+const CACHE_NAME = 'previo-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
   './supabase.js',
   './manifest.json',
   './icon.svg',
-  'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 

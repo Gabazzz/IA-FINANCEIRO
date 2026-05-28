@@ -16,8 +16,8 @@
   --border-focus: rgba(59, 130, 246, 0.4);
   --glow-opacity: 0.15;
   
-  --font-mono: 'IBM Plex Mono', 'Space Mono', monospace;
-  --font-sans: 'Plus Jakarta Sans', 'Figtree', sans-serif;
+  --font-mono: 'Space Grotesk', 'Space Mono', monospace;
+  --font-sans: 'Inter', 'Figtree', sans-serif;
 }
 
 /* Reset and Scrollbar customizations */
