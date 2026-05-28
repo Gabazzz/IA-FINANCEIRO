@@ -1,4 +1,4 @@
-const CACHE_NAME = 'previo-cache-v1';
+const CACHE_NAME = 'previo-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -41,8 +41,9 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event - cache-first with network fallback (stale-while-revalidate)
 self.addEventListener('fetch', (event) => {
-  // Não interceptar chamadas à API da Anthropic
+  // Não interceptar chamadas à API da Anthropic ou Supabase
   if (event.request.url.includes('api.anthropic.com')) return;
+  if (event.request.url.includes('supabase.co')) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
