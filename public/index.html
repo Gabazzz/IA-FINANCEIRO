@@ -85,10 +85,30 @@
         <line x1="40" y1="256" x2="472" y2="256" stroke="#10d98c" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.3"/>
         <path d="M 256 256 L 390 122 A 190 190 0 0 0 256 66 Z" fill="#10d98c" fill-opacity="0.15"/>
         <line x1="256" y1="256" x2="390" y2="122" stroke="#10d98c" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="256" cy="256" r="12" fill="#070c18" stroke="#10d98c" stroke-width="3"/>
       </svg>
       
-      <h1 class="onboarding-title">PREVIO</h1>
+      <div style="margin-bottom: 12px; display: flex; justify-content: center; align-items: center; width: 100%;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="220" height="63" style="display:block;">
+          <defs>
+            <linearGradient id="previo-onboarding-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0D9B6C" />
+              <stop offset="100%" stop-color="#00E09C" />
+            </linearGradient>
+          </defs>
+          <!-- PREVI Text -->
+          <text x="10" y="58" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="52" fill="#F1F5F9" letter-spacing="6">PREVI</text>
+          <!-- Icon Ø as the O -->
+          <g transform="translate(205, 8) scale(0.64)">
+            <!-- Top-Left Arc -->
+            <path d="M 70.6 20.5 A 36 36 0 0 0 20.5 70.6" fill="none" stroke="url(#previo-onboarding-grad)" stroke-width="9" stroke-linecap="round" />
+            <!-- Bottom-Right Arc -->
+            <path d="M 29.4 79.5 A 36 36 0 0 0 79.5 29.4" fill="none" stroke="url(#previo-onboarding-grad)" stroke-width="9" stroke-linecap="round" />
+            <!-- Diagonal Arrow -->
+            <line x1="25" y1="75" x2="82" y2="18" stroke="url(#previo-onboarding-grad)" stroke-width="9" stroke-linecap="round" />
+            <path d="M 58 18 L 82 18 L 82 42" fill="none" stroke="url(#previo-onboarding-grad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+        </svg>
+      </div>
       <p class="onboarding-subtitle">Veja o Futuro do Seu Saldo</p>
       
       <!-- Step 1: Boas-vindas -->
@@ -132,14 +152,27 @@
 
     <!-- App Shell Header -->
     <header class="app-header">
-      <div class="brand">
-        <!-- Minimal Radar SVG Logo -->
-        <svg class="brand-logo" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#10d98c" stroke-width="3" stroke-dasharray="3 3"/>
-          <line x1="50" y1="50" x2="78" y2="22" stroke="#10d98c" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="50" cy="50" r="6" fill="#070c18" stroke="#10d98c" stroke-width="2"/>
+      <div class="brand" style="display: flex; align-items: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="105" height="30" style="vertical-align: middle;">
+          <defs>
+            <linearGradient id="previo-header-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0D9B6C" />
+              <stop offset="100%" stop-color="#00E09C" />
+            </linearGradient>
+          </defs>
+          <!-- PREVI Text -->
+          <text x="10" y="58" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="52" fill="#F1F5F9" letter-spacing="6">PREVI</text>
+          <!-- Icon Ø as the O -->
+          <g transform="translate(205, 8) scale(0.64)">
+            <!-- Top-Left Arc -->
+            <path d="M 70.6 20.5 A 36 36 0 0 0 20.5 70.6" fill="none" stroke="url(#previo-header-grad)" stroke-width="9" stroke-linecap="round" />
+            <!-- Bottom-Right Arc -->
+            <path d="M 29.4 79.5 A 36 36 0 0 0 79.5 29.4" fill="none" stroke="url(#previo-header-grad)" stroke-width="9" stroke-linecap="round" />
+            <!-- Diagonal Arrow -->
+            <line x1="25" y1="75" x2="82" y2="18" stroke="url(#previo-header-grad)" stroke-width="9" stroke-linecap="round" />
+            <path d="M 58 18 L 82 18 L 82 42" fill="none" stroke="url(#previo-header-grad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
         </svg>
-        <span class="brand-name">PREVIO</span>
       </div>
       
       <!-- Date Filter & System Status grouped -->
